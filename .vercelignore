@@ -1,0 +1,6 @@
+backend/env
+backend/.env
+.env
+*.pyc
+__pycache__/
+.git/
