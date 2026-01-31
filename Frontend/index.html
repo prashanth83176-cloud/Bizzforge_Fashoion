@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizForge – Forge Your Future</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">
+      <span class="logo-icon">●</span>
+      <span>BizForge</span>
+    </div>
+
+    <div class="nav-actions">
+      <select class="lang-select">
+        <option>English</option>
+      </select>
+      <button class="theme-btn">🌙</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="hero">
+    <h1>Forge Your Future. Instantly</h1>
+    <p class="subtitle">
+      Create names, logos, marketing copy, their systems in seconds.
+    </p>
+
+    <!-- Input Form -->
+    <div class="input-section">
+      <input 
+        type="text" 
+        id="ideaInput" 
+        class="idea-input" 
+        placeholder="Enter your business idea (e.g., AI healthcare startup)" 
+        required
+      />
+      <button class="cta-btn" id="generateBtn">Generate Brand →</button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Creating your brand...</p>
+    </div>
+
+    <!-- Results Section -->
+    <section id="results" class="results-section hidden">
+      <div class="result-card">
+        <h3>Brand Name</h3>
+        <p id="resultName" class="result-value"></p>
+      </div>
+
+      <div class="result-card">
+        <h3>Slogan</h3>
+        <p id="resultSlogan" class="result-value"></p>
+      </div>
+
+      <div class="result-card">
+        <h3>Logo</h3>
+        <img id="resultLogo" src="" alt="Logo" class="logo-image"/>
+      </div>
+
+      <div class="result-card full-width">
+        <h3>Brand Guide</h3>
+        <p id="resultGuide" class="result-value"></p>
+      </div>
+
+      <button class="secondary-btn" id="resetBtn">← Generate Another</button>
+    </section>
+
+    <!-- Feature Cards -->
+    <section class="features" id="featuresSection">
+      <div class="card">
+        <div class="icon">🚀</div>
+        <h3>Brand DNA</h3>
+        <p>
+          Don’t just name it, define it.
+          Generate names, mnemonics that stick.
+        </p>
+        <a href="#">Explore →</a>
+      </div>
+
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h3>Visionary Logos</h3>
+        <p>
+          AI-powered vector logos
+          tailored to your niche.
+        </p>
+        <a href="#">Explore →</a>
+      </div>
+
+      <div class="card">
+        <div class="icon">✍️</div>
+        <h3>Copy Catalyst</h3>
+        <p>
+          Social posts and descriptions
+          that actually convert.
+        </p>
+        <a href="#">Explore →</a>
+      </div>
+
+      <div class="card">
+        <div class="icon">🧩</div>
+        <h3>Style Architect</h3>
+        <p>
+          Full palettes and typography systems
+          in one click.
+        </p>
+        <a href="#">Explore →</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
