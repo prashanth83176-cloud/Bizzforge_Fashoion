@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://bizzforge-fashoion.onrender.com";
 
 const ideaInput = document.getElementById("ideaInput");
 const generateBtn = document.getElementById("generateBtn");
@@ -9,127 +9,132 @@ const featuresSection = document.getElementById("featuresSection");
 const tabButtons = document.querySelectorAll(".tab-btn");
 const tabContents = document.querySelectorAll(".tab-content");
 
-// Tab switching
-if (tabButtons.length > 0) {
-  tabButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      tabButtons.forEach(b => b.classList.remove("active"));
-      tabContents.forEach(t => t.classList.add("hidden"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.remove("hidden");
-    });
+// Add this at the top to switch between tabs
+tabButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.tab;
+
+    // Update active button
+    tabButtons.forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+
+    // Update active content
+    tabContents.forEach(content => content.classList.remove("active"));
+    document.getElementById(target).classList.add("active");
   });
-}
+});
 
 generateBtn.addEventListener("click", generateAllBranding);
 resetBtn.addEventListener("click", resetForm);
+
 ideaInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") generateAllBranding();
+  if (e.key === "Enter") {
+    generateAllBranding();
+  }
 });
 
 async function generateAllBranding() {
   const idea = ideaInput.value.trim();
-  
+
   if (!idea) {
     alert("Please enter a business idea");
     return;
   }
 
+  loadingDiv.classList.remove("hidden");
+  resultsSection.classList.add("hidden");
+  featuresSection.classList.add("hidden");
+
   try {
-    loadingDiv.classList.remove("hidden");
-    resultsSection.classList.add("hidden");
-    featuresSection.classList.add("hidden");
-    generateBtn.disabled = true;
-
-    // Generate branding
-    const brandResponse = await fetch(`${API_URL}/branding/`, {
+    // Call Brand DNA API
+    const brandResponse = await fetch(`${API_URL}/branding/brand-dna`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea: idea }),
+      body: JSON.stringify({ idea })
     });
 
-    if (!brandResponse.ok) throw new Error(`Brand API Error: ${brandResponse.status}`);
+    if (!brandResponse.ok) {
+      throw new Error("Failed to generate brand DNA");
+    }
+
     const brandData = await brandResponse.json();
-
-    // Generate copy
-    const copyResponse = await fetch(`${API_URL}/content/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea: idea }),
-    });
-
-    if (!copyResponse.ok) throw new Error(`Copy API Error: ${copyResponse.status}`);
-    const copyData = await copyResponse.json();
-
-    // Generate style system
-    const styleResponse = await fetch(`${API_URL}/style/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea: idea, industry: "technology" }),
-    });
-
-    if (!styleResponse.ok) throw new Error(`Style API Error: ${styleResponse.status}`);
-    const styleData = await styleResponse.json();
 
     // Display Brand DNA results
     document.getElementById("resultName").textContent = brandData.name;
     document.getElementById("resultSlogan").textContent = brandData.slogan;
-    
+
     const logoImg = document.getElementById("resultLogo");
     logoImg.src = brandData.logo;
     logoImg.alt = `${brandData.name} Logo`;
-    logoImg.onerror = function() {
-      this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect fill='%23ff3d81' width='300' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='40' fill='white' font-weight='bold'%3E" + brandData.name.substring(0, 2).toUpperCase() + "%3C/text%3E%3C/svg%3E";
+    logoImg.onerror = function () {
+      this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23667eea' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='white' text-anchor='middle' dy='.3em'%3ELogo%3C/text%3E%3C/svg%3E";
     };
-    
+
     document.getElementById("resultGuide").innerHTML = formatGuide(brandData.guide);
 
-    // Display Copy Catalyst results if elements exist
-    if (document.getElementById("socialPost1")) {
-      document.getElementById("socialPost1").textContent = copyData.social_posts[0];
-      document.getElementById("socialPost2").textContent = copyData.social_posts[1];
-      document.getElementById("socialPost3").textContent = copyData.social_posts[2];
-      document.getElementById("landingHeadline").textContent = copyData.landing_headline;
-      document.getElementById("productDesc").textContent = copyData.product_description;
-      document.getElementById("emailSubject").textContent = copyData.email_subject;
+    // Call Marketing Copy API
+    const copyResponse = await fetch(`${API_URL}/content/copy-catalyst`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idea })
+    });
+
+    if (copyResponse.ok) {
+      const copyData = await copyResponse.json();
+      document.getElementById("copyResult").innerHTML = `
+        <h4>Social Media Post</h4>
+        <p>${copyData.social_post}</p>
+        <h4>Product Description</h4>
+        <p>${copyData.product_description}</p>
+        <h4>Email Campaign</h4>
+        <p>${copyData.email_campaign}</p>
+      `;
     }
 
-    // Display Style Architect results if elements exist
-    if (document.getElementById("primaryColor")) {
-      document.getElementById("primaryColor").textContent = styleData.primary_color;
-      document.getElementById("primaryColorBox").style.backgroundColor = styleData.primary_color;
-      
-      document.getElementById("secondaryColor").textContent = styleData.secondary_color;
-      document.getElementById("secondaryColorBox").style.backgroundColor = styleData.secondary_color;
-      
-      document.getElementById("accentColor").textContent = styleData.accent_color;
-      document.getElementById("accentColorBox").style.backgroundColor = styleData.accent_color;
+    // Call Style API
+    const styleResponse = await fetch(`${API_URL}/style/style-architect`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idea })
+    });
 
-      document.getElementById("typography").innerHTML = `
-        <p><strong>Heading Font:</strong> ${styleData.typography.heading_font}</p>
-        <p><strong>Body Font:</strong> ${styleData.typography.body_font}</p>
-        <p><strong>Line Height:</strong> ${styleData.typography.line_height}</p>
+    if (styleResponse.ok) {
+      const styleData = await styleResponse.json();
+      document.getElementById("styleResult").innerHTML = `
+        <h4>Color Palette</h4>
+        <div style="display:flex;gap:10px;margin:10px 0;">
+          ${styleData.colors.map(c => `<div style="background:${c};width:50px;height:50px;border-radius:8px;" title="${c}"></div>`).join('')}
+        </div>
+        <h4>Typography</h4>
+        <p><strong>Heading:</strong> ${styleData.typography.heading}</p>
+        <p><strong>Body:</strong> ${styleData.typography.body}</p>
       `;
+    }
 
-      document.getElementById("principles").innerHTML = styleData.design_principles
-        .map(p => `<li>${p}</li>`)
-        .join("");
+    // Call Sentiment API
+    const sentimentResponse = await fetch(`${API_URL}/content/sentiment-analysis`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: brandData.slogan })
+    });
+
+    if (sentimentResponse.ok) {
+      const sentimentData = await sentimentResponse.json();
+      document.getElementById("sentimentResult").innerHTML = `
+        <p><strong>Sentiment:</strong> ${sentimentData.sentiment}</p>
+        <p><strong>Score:</strong> ${sentimentData.score.toFixed(2)}</p>
+        <p><strong>Rationale:</strong> ${sentimentData.rationale}</p>
+      `;
     }
 
     loadingDiv.classList.add("hidden");
     resultsSection.classList.remove("hidden");
-    
-    // Set first tab as active if tabs exist
-    if (tabButtons.length > 0) {
-      tabButtons[0].click();
-    }
 
   } catch (error) {
     console.error("Error:", error);
+    alert("Failed to generate branding. Please try again.");
     loadingDiv.classList.add("hidden");
-    alert("Error generating brand: " + error.message);
-  } finally {
-    generateBtn.disabled = false;
+    featuresSection.classList.remove("hidden");
   }
 }
 
@@ -141,28 +146,19 @@ function resetForm() {
 }
 
 function formatGuide(guide) {
-  // Split by numbers and periods to create a structured list
-  let formatted = guide
-    .split(/(\d+\.)/)
-    .filter(part => part.trim())
-    .join('')
+  // Convert guide text to nice HTML with proper formatting
+  return guide
     .split('\n')
     .map(line => {
-      // Check for color codes (#XXXXXX format)
-      const colorRegex = /#[0-9a-fA-F]{6}/g;
-      const colors = line.match(colorRegex) || [];
-      
-      let html = line;
-      
-      // Replace color codes with color swatches
-      colors.forEach(color => {
-        const swatch = `<span class="color-swatch" style="background-color: ${color};" title="${color}"></span> <code>${color}</code>`;
-        html = html.replace(color, swatch);
-      });
-      
-      return `<p>${html}</p>`;
+      if (line.startsWith('**') && line.endsWith('**')) {
+        return `<h4>${line.replace(/\*\*/g, '')}</h4>`;
+      } else if (line.trim() === '') {
+        return '<br>';
+      } else if (line.startsWith('- ')) {
+        return `<li>${line.substring(2)}</li>`;
+      } else {
+        return `<p>${line}</p>`;
+      }
     })
     .join('');
-  
-  return formatted;
 }
