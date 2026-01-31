@@ -1,27 +1,10 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd backend && pip install -r ../requirements.txt",
+  "outputDirectory": "Frontend",
+  "rewrites": [
     {
-      "src": "backend/app/main.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "Frontend/**",
-      "use": "@vercel/static"
+      "source": "/api/:path*",
+      "destination": "/api/index.py"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/app/main.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "Frontend/$1"
-    }
-  ],
-  "env": {
-    "GROQ_API_KEY": "@groq_api_key",
-    "HUGGINGFACE_API_KEY": "@huggingface_api_key"
-  }
+  ]
 }
